@@ -1,0 +1,73 @@
+{
+  // 不调试、只是跑起来时用这些任务（终端里直接看 print 输出，最贴近
+  // `usagi dev <目标文件夹>` 的原始行为）。
+  // 运行方式：Cmd+Shift+B（默认构建任务 = dev）或 “Terminal > Run Task...”。
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "usagi: dev(工作区)",
+      "detail": "usagi dev ${workspaceFolder}",
+      "type": "shell",
+      "command": "/opt/homebrew/bin/usagi",
+      "args": ["dev", "${workspaceFolder}"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    },
+    {
+      "label": "usagi: dev(当前文件所在文件夹)",
+      "detail": "usagi dev <当前文件所在文件夹>",
+      "type": "shell",
+      "command": "/opt/homebrew/bin/usagi",
+      "args": ["dev", "${fileDirname}"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "usagi: run(无热重载)",
+      "detail": "usagi run ${workspaceFolder}",
+      "type": "shell",
+      "command": "/opt/homebrew/bin/usagi",
+      "args": ["run", "${workspaceFolder}"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "usagi: tools(工具窗口)",
+      "detail": "usagi tools ${workspaceFolder}",
+      "type": "shell",
+      "command": "/opt/homebrew/bin/usagi",
+      "args": ["tools", "${workspaceFolder}"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "usagi: refresh(同步 LSP 存根/文档)",
+      "detail": "usagi refresh",
+      "type": "shell",
+      "command": "/opt/homebrew/bin/usagi",
+      "args": ["refresh"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "usagi: export(打包)",
+      "detail": "usagi export ${workspaceFolder}",
+      "type": "shell",
+      "command": "/opt/homebrew/bin/usagi",
+      "args": ["export", "${workspaceFolder}"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    }
+  ]
+}

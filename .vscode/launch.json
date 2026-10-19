@@ -1,0 +1,48 @@
+{
+  // Usagi 本身没有调试协议，这里用已安装的 “Local Lua Debugger” 扩展
+  // 以“自定义 Lua 环境”的方式启动 `usagi dev`，从而支持断点、单步、查看变量。
+  //
+  // 说明：
+  // - usagi 路径可用 `which usagi` 查询（Homebrew 通常是 /opt/homebrew/bin/usagi）。
+  // - 断点调试需要 main.lua 里那段由 LOCAL_LUA_DEBUGGER_VSCODE 守卫的
+  //   lldebugger 启动代码（已加好），并配合 .vscode/lldebugger.lua。
+  // - 想同时看引擎帧率/内存日志，在 env 里加上 "USAGI_VERBOSE": "1"。
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Usagi: Dev(调试, 工作区)",
+      "type": "lua-local",
+      "request": "launch",
+      "program": {
+        "command": "/opt/homebrew/bin/usagi"
+      },
+      "args": ["dev", "${workspaceFolder}"],
+      "cwd": "${workspaceFolder}",
+      "scriptRoots": ["${workspaceFolder}"],
+      "ignorePatterns": ["^.*/%.vscode/"],
+      // false = 启动后不在入口处停留，直接跑起来，只有断点/报错时才停下
+      "stopOnEntry": false,
+      "env": {
+        "USAGI_LLDBG_PATH": "${workspaceFolder}/.vscode/lldebugger.lua"
+      }
+    },
+    {
+      // 适合一个仓库里放多个游戏：打开某个游戏的 main.lua 后按 F5，
+      // 会用该文件所在的文件夹作为 `usagi dev <目标文件夹>`。
+      "name": "Usagi: Dev(调试, 当前文件所在文件夹)",
+      "type": "lua-local",
+      "request": "launch",
+      "program": {
+        "command": "/opt/homebrew/bin/usagi"
+      },
+      "args": ["dev", "${fileDirname}"],
+      "cwd": "${workspaceFolder}",
+      "scriptRoots": ["${workspaceFolder}"],
+      "ignorePatterns": ["^.*/%.vscode/"],
+      "stopOnEntry": false,
+      "env": {
+        "USAGI_LLDBG_PATH": "${workspaceFolder}/.vscode/lldebugger.lua"
+      }
+    }
+  ]
+}
