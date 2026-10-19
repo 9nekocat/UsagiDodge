@@ -48,6 +48,8 @@ function _init()
     score = 0,
     score_timer = 0,
     best_score = 0,
+    playing_sound = {},
+    sound_timer = {},
   }
   local t = usagi.load()
   if t then
@@ -78,14 +80,20 @@ function _update(dt)
   if input.held(input.DOWN) then
     dy = dy + 1
   end
+
   -- 归一化：斜向移动不会比直向更快；无输入时返回 (0, 0)
   local dir = util.vec_normalize({ x = dx, y = dy })
   local pos = State.player.position
   pos.x = pos.x + dir.x * PLAYER_SPEED * dt
   pos.y = pos.y + dir.y * PLAYER_SPEED * dt
+
   -- 限制在屏幕内，避免走出画面
   pos.x = util.clamp(pos.x, 0, usagi.GAME_W - PLAYER_SIZE)
   pos.y = util.clamp(pos.y, 0, usagi.GAME_H - PLAYER_SIZE)
+  if dir.x ~= 0 or dir.y ~= 0 then
+    PlaySfxJuice("move", dt)
+  end
+
   -- 回收区域：屏幕四周各外扩 RECYCLE_MARGIN
   local recycle_rect = {
     x = -RECYCLE_MARGIN,
@@ -135,7 +143,7 @@ function _update(dt)
 end
 
 function _draw()
-  gfx.clear(gfx.COLOR_DARK_BLUE)
+  gfx.clear(gfx.COLOR_DARK_GREEN)
   gfx.spr(State.player.sprite, State.player.position.x, State.player.position.y)
 
   for _, bullet in ipairs(State.bullets) do
@@ -150,7 +158,7 @@ function _draw()
 
   TextAnchorCenter(tostring(State.score), usagi.GAME_W / 2, usagi.GAME_H / 4, gfx.COLOR_ORANGE)
   if State.game_state == GAME_STATE.GAME_OVER then
-    TextAnchorCenter("历史最高:"..tostring(State.best_score), usagi.GAME_W / 2, usagi.GAME_H / 4 - 20, gfx.COLOR_WHITE)
+    TextAnchorCenter("历史最高:" .. tostring(State.best_score), usagi.GAME_W / 2, usagi.GAME_H / 4 - 20, gfx.COLOR_WHITE)
   end
 end
 
@@ -207,4 +215,22 @@ function TextAnchorCenter(text, x, y, color)
   -- 用引擎实测的文字尺寸居中，中文等宽字体不能用“字数 × 固定字宽”估算
   local w, h = usagi.measure_text(text)
   gfx.text(text, x - w / 2, y - h / 2, color)
+end
+
+-- 维护一个内部timer，在timer结束前，静默的拒绝下次sfx的播放申请，并且下次timer时长在一定范围内随机
+function PlaySfxJuice(sound_name, dt)
+  local sound_timer = nil
+  if State.sound_timer[sound_name] then
+    sound_timer = State.sound_timer[sound_name]
+  else
+    State.sound_timer[sound_name] = 0
+  end
+
+  if State.sound_timer[sound_name] < 0 then
+    sfx.play(sound_name)
+    sfx.play_ex(sound_name, 0.5, 1.0 + math.random()*0.5, 0)
+    State.sound_timer[sound_name] = 0.1 + math.random() * 0.1
+  end
+
+  State.sound_timer[sound_name] = State.sound_timer[sound_name] - dt
 end
