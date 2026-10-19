@@ -38,6 +38,7 @@ function _init()
         x = (usagi.GAME_W - PLAYER_SIZE) / 2,
         y = (usagi.GAME_H - PLAYER_SIZE) / 2,
       },
+      sprite = 1,
     },
     bullets = {},
     game_state = GAME_STATE.PLAYING,
@@ -46,7 +47,12 @@ function _init()
     -- 分数
     score = 0,
     score_timer = 0,
+    best_score = 0,
   }
+  local t = usagi.load()
+  if t then
+    State.best_score = t[1] or 0
+  end
 end
 
 function _update(dt)
@@ -58,6 +64,7 @@ function _update(dt)
     return
   end
 
+  -- 游戏输入只在玩家Playing时
   local dx, dy = 0, 0
   if input.held(input.LEFT) then
     dx = dx - 1
@@ -79,7 +86,6 @@ function _update(dt)
   -- 限制在屏幕内，避免走出画面
   pos.x = util.clamp(pos.x, 0, usagi.GAME_W - PLAYER_SIZE)
   pos.y = util.clamp(pos.y, 0, usagi.GAME_H - PLAYER_SIZE)
-
   -- 回收区域：屏幕四周各外扩 RECYCLE_MARGIN
   local recycle_rect = {
     x = -RECYCLE_MARGIN,
@@ -88,6 +94,7 @@ function _update(dt)
     h = usagi.GAME_H + RECYCLE_MARGIN * 2,
   }
 
+  -- 子弹更新
   for i = #State.bullets, 1, -1 do
     local bullet = State.bullets[i]
     bullet.position.x = bullet.position.x + bullet.direction.x * BULLET_SPEED * dt
@@ -99,6 +106,7 @@ function _update(dt)
       y = bullet.position.y + BULLET_SIZE / 2,
       r = BULLET_COLLISION_SIZE / 2,
     }
+
     local p_col = { x = pos.x, y = pos.y, w = PLAYER_SIZE, h = PLAYER_SIZE }
     if util.circ_rect_overlap(b_col, p_col) then
       -- 玩家死亡：GameOver 会清空子弹，这里直接结束本帧
@@ -128,7 +136,7 @@ end
 
 function _draw()
   gfx.clear(gfx.COLOR_DARK_BLUE)
-  gfx.spr(1, State.player.position.x, State.player.position.y)
+  gfx.spr(State.player.sprite, State.player.position.x, State.player.position.y)
 
   for _, bullet in ipairs(State.bullets) do
     gfx.spr(3, bullet.position.x, bullet.position.y)
@@ -141,6 +149,9 @@ function _draw()
   end
 
   TextAnchorCenter(tostring(State.score), usagi.GAME_W / 2, usagi.GAME_H / 4, gfx.COLOR_ORANGE)
+  if State.game_state == GAME_STATE.GAME_OVER then
+    TextAnchorCenter("历史最高:"..tostring(State.best_score), usagi.GAME_W / 2, usagi.GAME_H / 4 - 20, gfx.COLOR_WHITE)
+  end
 end
 
 -- 子弹放置
@@ -174,6 +185,15 @@ function GameOver()
   State.game_state = GAME_STATE.GAME_OVER
   -- 清空子弹，避免画面定格在半空中
   State.bullets = {}
+  effect.hitstop(0.1)
+  effect.screen_shake(0.5, 4)
+  effect.flash(0.5, gfx.COLOR_RED)
+
+  -- 记录玩家的分数
+  if State.score > State.best_score then
+    State.best_score = State.score
+  end
+  usagi.save({ State.best_score })
 end
 
 ----- util ------

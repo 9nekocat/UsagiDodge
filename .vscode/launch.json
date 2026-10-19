@@ -14,7 +14,7 @@
       "type": "lua-local",
       "request": "launch",
       "program": {
-        "command": "/opt/homebrew/bin/usagi"
+        "command": "usagi"
       },
       "args": ["dev", "${workspaceFolder}"],
       "cwd": "${workspaceFolder}",
@@ -33,7 +33,7 @@
       "type": "lua-local",
       "request": "launch",
       "program": {
-        "command": "/opt/homebrew/bin/usagi"
+        "command": "usagi"
       },
       "args": ["dev", "${fileDirname}"],
       "cwd": "${workspaceFolder}",
