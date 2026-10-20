@@ -7,8 +7,7 @@ if os.getenv("LOCAL_LUA_DEBUGGER_VSCODE") == "1" and not package.loaded["lldebug
   require("lldebugger").start()
 end
 
------ 游戏逻辑：移动角色，躲避从屏幕外飞来的子弹
-
+-- 游戏逻辑：移动角色，躲避从屏幕外飞来的子弹
 local PLAYER_SIZE = 16
 local PLAYER_SPEED = 100
 -- 与 sprites.png 里子弹精灵的 16x16 保持一致：绘制、移动、圆心补偿都用它
@@ -196,6 +195,7 @@ function GameOver()
   effect.hitstop(0.1)
   effect.screen_shake(0.5, 4)
   effect.flash(0.5, gfx.COLOR_RED)
+  sfx.play("explosion")
 
   -- 记录玩家的分数
   if State.score > State.best_score then
@@ -204,9 +204,8 @@ function GameOver()
   usagi.save({ State.best_score })
 end
 
------ util ------
-
--- 以 (x, y) 为中心绘制文字
+-------------------------------- util --------------------------------
+---以 (x, y) 为中心绘制文字
 ---@param text string
 ---@param x number
 ---@param y number
@@ -219,16 +218,13 @@ end
 
 -- 维护一个内部timer，在timer结束前，静默的拒绝下次sfx的播放申请，并且下次timer时长在一定范围内随机
 function PlaySfxJuice(sound_name, dt)
-  local sound_timer = nil
-  if State.sound_timer[sound_name] then
-    sound_timer = State.sound_timer[sound_name]
-  else
+  if State.sound_timer[sound_name] == nil then
     State.sound_timer[sound_name] = 0
   end
 
   if State.sound_timer[sound_name] < 0 then
     sfx.play(sound_name)
-    sfx.play_ex(sound_name, 0.5, 1.0 + math.random()*0.5, 0)
+    sfx.play_ex(sound_name, 0, 1.0 + math.random() * 0.5, 0)
     State.sound_timer[sound_name] = 0.1 + math.random() * 0.1
   end
 
